@@ -4,8 +4,8 @@
 import Button from '@mui/material/Button';
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { Container } from '@mui/system';
-import { Stack, Item, TextField, Autocomplete, TablePagination } from '@mui/material';
+import { Container, style } from '@mui/system';
+import { Stack, Item, TextField, Autocomplete, TablePagination, Paper } from '@mui/material';
 // getAPI
 import { getSearch, getSearchAll } from './stores/reducers/search';
 import { getUserRepo } from './stores/reducers/repository';
@@ -14,23 +14,32 @@ import { getUserRepo } from './stores/reducers/repository';
 function App() {
   // useDispatch
   const searchBar = useSelector(state => state.search.data.items)
+  const listRepo = useSelector((state) => state.repo.data)
   const dispatch = useDispatch();
   // Global
   // state
   const [valSearch, setValSearch] = useState([])
+  const [inputSearch, setInputSearch] = useState('')
   const [page, setPage] = useState(2)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
 
   useEffect(() => {
-      dispatch(getSearch('lamse'))
-
+      dispatch(getSearch(inputSearch))
       if(searchBar){
         setValSearch(searchBar)
       }
-    // dispatch(getUserRepo)
-  }, [getSearch()])
+    }, [dispatch,inputSearch])
+    
+    
+  useEffect(() => {
+    dispatch(getUserRepo(inputSearch))
+    localStorage.setItem('perPages', JSON.stringify(rowsPerPage));
+  }, [inputSearch, rowsPerPage, getUserRepo()])
 
+  const handleChangeSearch = (event) => {
+    setInputSearch(event.target.value);
+  }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -38,6 +47,7 @@ function App() {
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+
     setPage(0);
   };
 
@@ -54,6 +64,8 @@ function App() {
                 freeSolo
                 id="free-solo-2-demo"
                 disableClearable
+                value={inputSearch}
+                onChange={handleChangeSearch}
                 options={valSearch.map((option) => option.login)}
                 renderInput={(params) => (
                   <TextField
@@ -71,7 +83,22 @@ function App() {
          
          <div>
             <h3>Repository</h3>
-            <div>
+            <div style={{width: "100%"}}>
+            
+            <div style={{
+              display:"flex",
+              flexWrap: "wrap"
+              }}>
+                {listRepo.map((list) => {
+                  return (
+                    <div  style={{background: "#131313", padding:"6px 8px", width: "300px", color: "white",margin: "5px"}}>
+                      <p key={list.id}>{list.id}</p>
+                      <h4>{list.name}</h4>
+                      <p>{list.language}</p>
+                    </div>
+                  )
+                })}
+            </div>
             
             <TablePagination
               component="div"
@@ -83,8 +110,7 @@ function App() {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
             </div>
-            {/* <div></div> */}
-            {JSON.stringify(valSearch)}
+            
        </div>
        </Stack>
       </Container>

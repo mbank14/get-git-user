@@ -3,10 +3,14 @@ import axios from "axios";
 
 
 export const getUserRepo = createAsyncThunk("userRepo/getUserRepo", async (object, rejectWithValue) => {
-    const userName = 'lamseboen'
+    const perPage = localStorage.getItem("perPages")
 
     try {
-        const res = await axios.get( `https://api.github.com/users/${userName}/repos`)
+        const res = await axios.get( `https://api.github.com/users/${object}/repos`, {
+            params: {
+                per_page: perPage
+            }
+        })
         return res.data
 
     } catch (err) {
